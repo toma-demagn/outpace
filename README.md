@@ -139,7 +139,7 @@ Before running Outpace, you'll need:
 ### 1. Clone the repository
 
 ```console
-git clone https://github.com/yourusername/outpace.git
+git clone https://github.com/toma-demagn/outpace.git
 cd outpace
 ```
 
