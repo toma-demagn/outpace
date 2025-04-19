@@ -134,7 +134,7 @@ Before running Outpace, you'll need:
 - A Strava API application (to get Client ID and Secret)
 - A Mapbox account (for the access token)
 
-## Setup and Installation
+## Setup
 
 ### 1. Clone the repository
 
