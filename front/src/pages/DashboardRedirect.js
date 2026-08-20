@@ -25,6 +25,7 @@ import {
   getUserTripsFromDB,
   getParamValues,
 } from "../utils/functions";
+import { getStaticDemo, STATIC_DEMO_TOKEN } from "../utils/demo";
 
 const { REACT_APP_CLIENT_ID, REACT_APP_WEB_URL } = process.env;
 
@@ -44,6 +45,19 @@ const DBRedirect = (props) => {
   useEffect(() => {
     const fetch = async () => {
       try {
+        if (token === STATIC_DEMO_TOKEN) {
+          const demo = await getStaticDemo();
+          props.setUserId(demo.profile.id);
+          props.setUserName(demo.profile.name);
+          props.setExternal(true);
+          props.setUserActivities(demo.activities);
+          props.setUsersummary(demo.activities);
+          props.setUserTrips(demo.trips);
+          props.setPinnedActivities(demo.pinned_activities);
+          props.setDistanceRides(demo.rankings);
+          navigate("/dashboard");
+          return;
+        }
         const dbData = await getDashboardFromToken(token);
         userID = dbData.strava_id;
         userName = dbData["name"];
@@ -55,6 +69,9 @@ const DBRedirect = (props) => {
       }
     };
     fetch().then((r) => {
+      if (token === STATIC_DEMO_TOKEN) {
+        return;
+      }
       if (!userID) {
         navigate("/");
       } else {
@@ -80,5 +97,6 @@ export default connect(null, {
   setPinnedActivities,
   setUserName,
   setExternal,
+  setUsersummary,
   setUserActivities,
 })(DBRedirect);

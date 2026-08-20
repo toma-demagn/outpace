@@ -1,5 +1,5 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 import { createStore } from "redux";
 
@@ -9,7 +9,9 @@ import AppRouter from "./router/AppRouter";
 import reducers from "./reducers";
 
 
-ReactDOM.render(
+const root = createRoot(document.getElementById("root"));
+
+root.render(
   <Provider
     store={createStore(
       reducers,
@@ -19,5 +21,4 @@ ReactDOM.render(
   >
     <AppRouter />
   </Provider>,
-  document.getElementById("root"),
 );

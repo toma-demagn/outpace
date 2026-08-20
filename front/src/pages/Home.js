@@ -32,7 +32,7 @@ const Home = (props) => {
       console.log("strava_id is set with the value: " + strava_id);
     }
     if (goToAuth) {
-      window.location = `http://www.strava.com/oauth/authorize?client_id=${REACT_APP_CLIENT_ID}&response_type=code&redirect_uri=${URL}/exchange_token&approval_prompt=force&scope=${scope}`;
+      window.location = `https://www.strava.com/oauth/authorize?client_id=${REACT_APP_CLIENT_ID}&response_type=code&redirect_uri=${URL}/exchange_token&approval_prompt=force&scope=${scope}`;
     } else {
       props.setUserId(strava_id);
       props.setExternal(false);

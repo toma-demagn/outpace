@@ -1,22 +1,15 @@
-FROM python:3.9
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
 WORKDIR /code
 
-RUN apt-get update && apt-get install -y dos2unix
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-COPY ./wait-for-postgres.sh /code/wait-for-postgres.sh
+COPY main.py .
+COPY sql_app ./sql_app
 
-COPY ./requirements.txt /code/requirements.txt
-
-RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
-
-COPY ./main.py /code/main.py
-COPY ./sql_app /code/sql_app
-
-ENV OUTPACE_DB=$OUTPACE_DB
-ENV OUTPACE_HOST=$OUTPACE_HOST
-ENV OUTPACE_PASSWORD=$OUTPACE_PASSWORD
-ENV OUTPACE_PORT=$OUTPACE_PORT
-ENV OUTPACE_USER=$OUTPACE_USER
-
+EXPOSE 8000
 CMD ["python", "main.py"]

@@ -4,7 +4,7 @@ import {
   centerZoomFromLocations,
   convertToKm,
   formatNumber,
-  mapboxProvider,
+  getProvider,
   shortenText,
 } from "../utils/functions";
 import {
@@ -73,7 +73,7 @@ function ActivityForRanking({ activity, crit }) {
         height={mapHeight}
         defaultCenter={[center[1], center[0]]}
         defaultZoom={zoom}
-        provider={mapboxProvider}
+        provider={getProvider()}
         twoFingerDrag={false}
         mouseEvents={false}
       >

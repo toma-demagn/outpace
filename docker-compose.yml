@@ -1,30 +1,56 @@
-version: '3'
 services:
-  frontend:
-    build: ./front
-    ports:
-      - '3000:3000'
-    depends_on:
-      - backend
+  database:
+    image: postgres:16-alpine
     environment:
-      REACT_APP_CLIENT_ID: ${REACT_APP_CLIENT_ID}
-      REACT_APP_CLIENT_SECRET: ${REACT_APP_CLIENT_SECRET}
-      REACT_APP_HOST_URL: ${REACT_APP_HOST_URL}
-      REACT_APP_MAPBOX_ACCESS_TOKEN: ${REACT_APP_MAPBOX_ACCESS_TOKEN}
-      REACT_APP_ION_DEFAULT_ACCESS_TOKEN: ${REACT_APP_ION_DEFAULT_ACCESS_TOKEN}
-      REACT_APP_WEB_URL: ${REACT_APP_WEB_URL}
-      REACT_APP_DEMO_TOKEN: ${REACT_APP_DEMO_TOKEN}
+      POSTGRES_DB: ${OUTPACE_DB:-outpace}
+      POSTGRES_USER: ${OUTPACE_USER:-outpace}
+      POSTGRES_PASSWORD: ${OUTPACE_PASSWORD:-outpace}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 2s
+      timeout: 5s
+      retries: 15
+
   backend:
     build: ./back
     ports:
-      - '8000:8000'
-    networks:
-      - bridge
+      - "8000:8000"
+    depends_on:
+      database:
+        condition: service_healthy
     environment:
-      OUTPACE_DB: ${OUTPACE_DB}
-      OUTPACE_HOST: ${OUTPACE_HOST}
-      OUTPACE_PASSWORD: ${OUTPACE_PASSWORD}
-      OUTPACE_PORT: ${OUTPACE_PORT}
-      OUTPACE_USER: ${OUTPACE_USER}
-networks:
-  bridge:
+      OUTPACE_DB: ${OUTPACE_DB:-outpace}
+      OUTPACE_HOST: database
+      OUTPACE_PASSWORD: ${OUTPACE_PASSWORD:-outpace}
+      OUTPACE_PORT: 5432
+      OUTPACE_USER: ${OUTPACE_USER:-outpace}
+      STRAVA_CLIENT_ID: ${CLIENT_ID}
+      STRAVA_CLIENT_SECRET: ${CLIENT_SECRET}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+
+  frontend:
+    build: ./front
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      REACT_APP_CLIENT_ID: ${CLIENT_ID}
+      REACT_APP_HOST_URL: ${REACT_APP_HOST_URL:-http://localhost:8000}
+      REACT_APP_WEB_URL: ${REACT_APP_WEB_URL:-http://localhost:3000}
+      REACT_APP_MAPBOX_ACCESS_TOKEN: ${REACT_APP_MAPBOX_ACCESS_TOKEN:-}
+      REACT_APP_ION_DEFAULT_ACCESS_TOKEN: ${REACT_APP_ION_DEFAULT_ACCESS_TOKEN:-}
+      REACT_APP_DEMO_TOKEN: ${REACT_APP_DEMO_TOKEN:-static-demo}
+      WATCHPACK_POLLING: "true"
+    stdin_open: true
+    tty: true
+
+volumes:
+  postgres_data:

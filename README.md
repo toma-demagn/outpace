@@ -126,56 +126,61 @@ graph TD
     class External,StravaAPI,StravaAuth,ExternalElevationAPI,Geocoding external
 ```
 
-## Prerequisites
+## Run locally
 
-Before running Outpace, you'll need:
+You need Docker Compose and a Strava API application. In the Strava application
+settings, set the authorization callback domain to `localhost`.
 
-- Docker and Docker Compose
-- A Strava API application (to get Client ID and Secret)
-- A Mapbox account (for the access token)
+Create a root `.env` file (it is ignored by Git):
 
-## Setup
+```dotenv
+CLIENT_ID=your_strava_client_id
+CLIENT_SECRET=your_strava_client_secret
 
-### 1. Clone the repository
+# Optional: needed for Mapbox-backed map tiles
+REACT_APP_MAPBOX_ACCESS_TOKEN=your_mapbox_token
+
+# Optional: needed for Cesium elevation lookups
+REACT_APP_ION_DEFAULT_ACCESS_TOKEN=your_cesium_ion_token
+```
+
+Then build and start the complete stack:
 
 ```console
-git clone https://github.com/toma-demagn/outpace.git
-cd outpace
+docker compose up --build -d
 ```
 
-### 2. Configure environment variables
+Open [http://localhost:3000](http://localhost:3000). The API and its interactive
+documentation are available at [http://localhost:8000/docs](http://localhost:8000/docs).
 
-Create two `.env` files with your credentials:
+### Static demo
 
-**Root `.env` file** (for database configuration):
-
-```
-POSTGRES_USER=username
-POSTGRES_PASSWORD=password
-POSTGRES_DB=db_name
-POSTGRES_PORT=5432
-```
-
-**`outpace-front/.env` file** (for frontend configuration):
-
-```
-REACT_APP_CLIENT_ID="your_strava_client_id"
-REACT_APP_CLIENT_SECRET="your_strava_secret"
-REACT_APP_HOST_URL="http://localhost:8000"
-REACT_APP_MAPBOX_ACCESS_TOKEN="your_mapbox_token"
-```
-
-### 3. Run with Docker
-
-With Docker running, start the application:
+The **See a demo!** button works without Strava or PostgreSQL data. Its fixture is
+generated from the checked-in StatsHunters export:
 
 ```console
-docker-compose up
+python3 scripts/build_demo_data.py \
+  StatsHunters-Export-2026-08-20.xlsx \
+  front/public/demo-data.json \
+  --gpx-dir trip1 --gpx-dir trip2 --gpx-dir trip3 --gpx-dir trip4 \
+  --pinned-dir pinned
 ```
 
-The application will be available at:
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:8000
+The fixture powers cycling and running distance/elevation rankings. Optional GPX
+directories add route geometry and multi-day trip cards to the same static demo.
+The optional pinned directory populates the pinned-activity carousel.
+
+PostgreSQL data is kept in a named Docker volume, so normal container restarts do
+not erase imported activities. Useful commands:
+
+```console
+docker compose logs -f
+docker compose down
+docker compose down -v # also deletes the local database
+```
+
+The Strava client secret is used only by the backend and is never included in the
+frontend JavaScript bundle.
 
 ## Usage
 
@@ -190,8 +195,8 @@ The application will be available at:
 
 ### Project Structure
 
-- `outpace-front/`: React frontend application
-- `outpace-back/`: FastAPI backend application
+- `front/`: React frontend application
+- `back/`: FastAPI backend application
 - `docker-compose.yml`: Docker configuration for development
 
 ### Contributing

@@ -84,6 +84,19 @@ function WorldMap({ activities, name }) {
   });
   console.log("filtered activities", filteredActivities);
 
+  const routeActivities = (activities ?? []).filter(
+    (activity) => activity.summary_polyline,
+  );
+
+  if (routeActivities.length === 0) {
+    return (
+      <div style={{ paddingTop: "3em", textAlign: "center" }}>
+        <h1>{name} heatmap</h1>
+        <p>Route map and multi-day trips will appear after the GPX import.</p>
+      </div>
+    );
+  }
+
   // Don't try to use geoJson until it's defined
   if (!geoJsonQuebec) {
     return <div>Loading...</div>;
@@ -93,7 +106,7 @@ function WorldMap({ activities, name }) {
   let geos = [];
   let combinedCoords = [];
   let activitiesInEachCountry = [];
-  activities.forEach((activity) => {
+  routeActivities.forEach((activity) => {
     try {
       const activityCoordinates = polyline
         .decode(activity.summary_polyline)

@@ -1,4 +1,5 @@
 import datetime
+import os
 import random
 from typing import List
 from fastapi import Depends, FastAPI, HTTPException, BackgroundTasks, Query
@@ -11,6 +12,7 @@ from . import database
 from haversine import haversine
 from fastapi.middleware.cors import CORSMiddleware
 from geopy.geocoders import Nominatim
+import requests
 
 from .schemas import ActivityInfo
 from .utils import fetch_elevations, decode_polyline
@@ -35,6 +37,41 @@ geolocator = Nominatim(user_agent="outpace")
 def init_db():
     engine, _ = database.get_database_engine_and_session()
     models.Base.metadata.create_all(bind=engine)
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
+
+def request_strava_token(payload):
+    client_id = os.getenv("STRAVA_CLIENT_ID")
+    client_secret = os.getenv("STRAVA_CLIENT_SECRET")
+    if not client_id or not client_secret:
+        raise HTTPException(status_code=500, detail="Strava credentials are not configured")
+
+    try:
+        response = requests.post(
+            "https://www.strava.com/api/v3/oauth/token",
+            data={"client_id": client_id, "client_secret": client_secret, **payload},
+            timeout=15,
+        )
+    except requests.RequestException as error:
+        raise HTTPException(status_code=502, detail="Could not reach Strava") from error
+
+    if not response.ok:
+        raise HTTPException(status_code=response.status_code, detail="Strava rejected the token request")
+    return response.json()
+
+
+@app.post("/oauth/exchange")
+def exchange_strava_code(exchange: schemas.OAuthCodeExchange):
+    return request_strava_token({"code": exchange.code, "grant_type": "authorization_code"})
+
+
+@app.post("/oauth/refresh")
+def refresh_strava_token(refresh: schemas.OAuthRefresh):
+    return request_strava_token({"refresh_token": refresh.refresh_token, "grant_type": "refresh_token"})
 
 
 # Dependency

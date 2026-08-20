@@ -16,7 +16,6 @@ const geolib = require("geolib");
 
 export const {
   REACT_APP_CLIENT_ID,
-  REACT_APP_CLIENT_SECRET,
   REACT_APP_HOST_URL,
   REACT_APP_WEB_URL,
   REACT_APP_MAPBOX_ACCESS_TOKEN,
@@ -38,16 +37,18 @@ export const getParamValues = (url) => {
   }, {});
 };
 export const cleanUpAuthToken = (str) => {
-  return str.split("&")[1].slice(5);
+  return new URLSearchParams(str).get("code");
 };
 export const testAuthGetter = async (authTok) => {
   try {
     const response = await axios.post(
-      `https://www.strava.com/api/v3/oauth/token?client_id=${REACT_APP_CLIENT_ID}&client_secret=${REACT_APP_CLIENT_SECRET}&code=${authTok}&grant_type=authorization_code`,
+      `${REACT_APP_HOST_URL}/oauth/exchange`,
+      { code: authTok },
     );
     return response.data;
   } catch (error) {
-    console.log(error);
+    console.error("Strava authentication failed", error);
+    throw error;
   }
 };
 export const postUserToken = async (toks) => {
@@ -98,19 +99,12 @@ async function postNewToken(stravaId, newToken, newRefreshToken, expiresAt) {
 // To fetch new token from strava and store it in DB
 
 export const reloadToken = async (stravaId) => {
-  // Retrieve client_id and client_secret from .env
-  const client_id = process.env.REACT_APP_CLIENT_ID;
-
-  const client_secret = process.env.REACT_APP_CLIENT_SECRET;
   // Retrieve refresh_token from the function getRefreshTokenFromDB
   const refresh_token = await getRefreshTokenFromDB(stravaId);
   try {
     const response = await axios.post(
-      "https://www.strava.com/api/v3/oauth/token",
+      `${REACT_APP_HOST_URL}/oauth/refresh`,
       {
-        client_id: client_id,
-        client_secret: client_secret,
-        grant_type: "refresh_token",
         refresh_token: refresh_token.refresh_token,
       },
     );
@@ -445,8 +439,8 @@ export async function fetchNewActivities(strava_id) {
 //      : undefined;
 //}
 export function getProvider(dark) {
-  if (!dark) return mapboxProvider;
-  else return mapboxProviderDark;
+  if (!REACT_APP_MAPBOX_ACCESS_TOKEN) return undefined;
+  return dark ? mapboxProviderDark : mapboxProvider;
 }
 
 export function mapboxProvider(x, y, z, dpr) {
@@ -590,7 +584,7 @@ export const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString(undefined, options);
 };
 export const nameTrip = (trip) => {
-  return `Trip from ${trip.start} to ${trip.end}`;
+  return trip.name || `Trip from ${trip.start} to ${trip.end}`;
 };
 export const shortenText = (str, nb) => {
   return str.length <= nb ? str : `${str.substring(0, nb)}...`;

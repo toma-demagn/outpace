@@ -89,13 +89,13 @@ const DBRedirect = (props) => {
         console.log(props);
         console.log(error.stack);
         //If error, go back home
-        window.location = `http://www.strava.com/oauth/authorize?client_id=${REACT_APP_CLIENT_ID}&response_type=code&redirect_uri=${URL}/exchange_token&approval_prompt=force&scope=${scope}`;
+        window.location = `https://www.strava.com/oauth/authorize?client_id=${REACT_APP_CLIENT_ID}&response_type=code&redirect_uri=${URL}/exchange_token&approval_prompt=force&scope=${scope}`;
       }
     };
     fetch().then((r) => {
       if (rankedRidesDist === undefined || rankedRidesDist.length === 0) {
         console.log("here");
-        window.location = `http://www.strava.com/oauth/authorize?client_id=${REACT_APP_CLIENT_ID}&response_type=code&redirect_uri=${URL}/exchange_token&approval_prompt=force&scope=${scope}`;
+        window.location = `https://www.strava.com/oauth/authorize?client_id=${REACT_APP_CLIENT_ID}&response_type=code&redirect_uri=${URL}/exchange_token&approval_prompt=force&scope=${scope}`;
       } else {
         console.log("there");
         props.setExternal(externalOrigin ?? null);

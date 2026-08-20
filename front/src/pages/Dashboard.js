@@ -81,6 +81,7 @@ let name;
 
 const Dashboard = (props) => {
   const trips = useSelector((state) => state.userTrips);
+  const zoomeds = useSelector((state) => state.zoomeds) ?? [];
   const external = useSelector((state) => state.externalOrigin);
   name = useSelector((state) => state.userName);
   if (!external) {
@@ -89,8 +90,6 @@ const Dashboard = (props) => {
     name = `${name}'s`;
   }
   console.log("external", external, "name", name);
-  let zoomeds = new Array(trips.length).fill(false);
-  props.setZoomeds(zoomeds);
   const pinnedActivities = useSelector((state) => state.pinnedActivities);
   const rankedActivities = useSelector((state) => state.distanceRides);
   const strava_id = useSelector((state) => state.userId);
@@ -98,6 +97,10 @@ const Dashboard = (props) => {
   const navigate = useNavigate();
   const scrollContainerRef = React.useRef(null);
   const [isOverflowing, setIsOverflowing] = useState(false);
+
+  useEffect(() => {
+    props.setZoomeds(new Array(trips.length).fill(false));
+  }, [trips.length]);
 
   useEffect(() => {
     const checkOverflow = () => {
@@ -115,11 +118,15 @@ const Dashboard = (props) => {
   const [activities, setActivities] = useState([]);
 
   useEffect(() => {
+    if (external) {
+      setActivities(userActivities ?? []);
+      return;
+    }
     getUserActivitiesFromDB(
       strava_id,
       pinnedActivities.map((activity) => activity.id),
     ).then(setActivities);
-  }, []);
+  }, [external, pinnedActivities, strava_id, userActivities]);
 
   async function addToPinnedActivity(id) {
     const data = await pinActivity(id);
@@ -210,8 +217,9 @@ const Dashboard = (props) => {
   };
 
   const handleTripToggleButtonClick = (index) => {
-    zoomeds[index] = !zoomeds[index];
-    props.setZoomeds(zoomeds);
+    const nextZoomeds = [...zoomeds];
+    nextZoomeds[index] = !nextZoomeds[index];
+    props.setZoomeds(nextZoomeds);
   };
 
   const handleTripClick = async (index) => {

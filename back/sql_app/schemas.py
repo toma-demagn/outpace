@@ -54,6 +54,14 @@ class TokenRegistration(BaseModel):
     token_type: str
 
 
+class OAuthCodeExchange(BaseModel):
+    code: str
+
+
+class OAuthRefresh(BaseModel):
+    refresh_token: str
+
+
 class ActivityBase(BaseModel):
     id: int
     strava_id: int

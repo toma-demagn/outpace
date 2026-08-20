@@ -29,16 +29,14 @@ function Activity({ activity }) {
       setGeoWithElevations(result);
       await addElevationsToActivity(activity.id, result); //storing the altitudes in DB for saving API requests
     };
-    if (!geoWithElevations) {
+    if (!addElevations && !geoWithElevations) {
       fetchAltitudes().then((r) => console.log("altitudes fetched", r));
     }
-  }, [actJson, activity.id, geoWithElevations]);
+  }, [actJson, activity.id, addElevations, geoWithElevations]);
 
 
   // if elevations were stored in db, we set them in the geoJsonWithElevations
-  if (addElevations && !geoWithElevations) {
-    setGeoWithElevations(actJson);
-  }
+  const displayedGeo = geoWithElevations ?? (addElevations ? actJson : null);
 
   const mapWidth = window.innerWidth * 0.35;
   const mapHeight = window.innerHeight * 0.45;
@@ -47,10 +45,10 @@ function Activity({ activity }) {
     mapWidth,
     mapHeight,
   );
-  if (!geoWithElevations) {
+  if (!displayedGeo) {
     return getMapWithNoColorDiv();
   }
-  const geoJsonWithColors = geoColorFromGeo(geoWithElevations);
+  const geoJsonWithColors = geoColorFromGeo(displayedGeo);
 
   function getMapWithColorDiv() {
     return (
