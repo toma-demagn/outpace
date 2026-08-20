@@ -133,19 +133,17 @@ function Trip({ trip, index, onButtonClick }) {
     trip.activities[trip.activities.length - 1].elapsed_time,
   );
   return (
-    <div className="row" style={{ padding: "10px" }}>
-      <div className="column33">
+    <div className="trip-card-content">
+      <div className="trip-copy">
         {/*<h2>Trip #{index + 1}</h2>*/}
         <h2>{nameTrip(trip)}</h2>
-        <div style={{ marginLeft: "2em" }}>
-          <p>{duration} days</p>
-          <p>{totalDistanceDisplay}km</p>
-          <p>
-            {totalElevationGainDisplay}m <FontAwesomeIcon icon={faLevelUpAlt} />
-          </p>
+        <div className="trip-metrics">
+          <p><strong>{duration}</strong><span>days</span></p>
+          <p><strong>{totalDistanceDisplay}</strong><span>kilometres</span></p>
+          <p><strong>{totalElevationGainDisplay}</strong><span>metres climbed <FontAwesomeIcon icon={faLevelUpAlt} /></span></p>
         </div>
       </div>
-      <div className="column66" style={{ position: "relative" }}>
+      <div className="trip-map">
         <Map
           width={mapWidth}
           height={mapHeight}
@@ -214,8 +212,9 @@ function Trip({ trip, index, onButtonClick }) {
         </Map>
 
         <button
+          className="map-toggle"
           onClick={handleToggleClick}
-          style={{ position: "absolute", top: "1em", right: "6em" }}
+          aria-label={zoomed ? "Zoom out" : "Zoom into route"}
         >
           <i className={zoomInOut}></i>
         </button>

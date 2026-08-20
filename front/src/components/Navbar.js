@@ -1,22 +1,22 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import info from "../assets/info.png";
+import { REACT_APP_DEMO_TOKEN } from "../utils/functions";
 
-const Navbar = () => {
-  return (
-    <nav className="navbar fixed-top navbar-expand-lg navbar-light bg-light">
-      <div className="container">
-        <Link className="navbar-brand nav-title purple-text" to="/">
-          Outpace
+const Navbar = () => (
+  <nav className="outpace-nav fixed-top">
+    <div className="nav-inner">
+      <Link className="wordmark" to="/" aria-label="Outpace home">
+        <span className="wordmark-mark">O</span>
+        <span>Outpace</span>
+      </Link>
+      <div className="nav-links">
+        <Link to="/about">About</Link>
+        <Link className="nav-demo-link" to={`/redirectDashboard?token=${REACT_APP_DEMO_TOKEN}`}>
+          Open demo
         </Link>
-        <div className="navbar-nav ml-auto">
-          <Link className="navbar-brand nav-title purple-text" to="/about">
-            <img src={info} alt="info" style={{ width: "1.3em" }} />
-          </Link>
-        </div>
       </div>
-    </nav>
-  );
-};
+    </div>
+  </nav>
+);
 
 export default Navbar;

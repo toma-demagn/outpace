@@ -90,10 +90,10 @@ function WorldMap({ activities, name }) {
 
   if (routeActivities.length === 0) {
     return (
-      <div style={{ paddingTop: "3em", textAlign: "center" }}>
-        <h1>{name} heatmap</h1>
+      <section className="dashboard-section worldmap-section">
+        <div className="section-heading"><span className="section-index">02</span><div><span className="section-kicker">Across the map</span><h2>Everywhere you've moved.</h2></div></div>
         <p>Route map and multi-day trips will appear after the GPX import.</p>
-      </div>
+      </section>
     );
   }
 
@@ -142,20 +142,12 @@ function WorldMap({ activities, name }) {
   );
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        paddingTop: "3em",
-      }}
-    >
-      <h1>
-        {name} heatmap{" "}
-        <span style={{ fontSize: "0.4em" }}>
-          (click any country for details)
-        </span>
-      </h1>
+    <section className="dashboard-section worldmap-section">
+      <div className="section-heading">
+        <span className="section-index">02</span>
+        <div><span className="section-kicker">Across the map</span><h2>Everywhere you've moved.</h2><p>Choose a country to explore its activities.</p></div>
+      </div>
+      <div className="world-map-frame">
       <Dialog
         open={countryActivitiesOpen}
         onClose={handleCloseOpenActivity}
@@ -248,7 +240,8 @@ function WorldMap({ activities, name }) {
           />
         ))}
       </Map>
-    </div>
+      </div>
+    </section>
   );
 }
 

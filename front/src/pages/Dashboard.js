@@ -77,19 +77,13 @@ const RightArrowButton = styled.button`
   }
 `;
 
-let name;
-
 const Dashboard = (props) => {
   const trips = useSelector((state) => state.userTrips);
   const zoomeds = useSelector((state) => state.zoomeds) ?? [];
   const external = useSelector((state) => state.externalOrigin);
-  name = useSelector((state) => state.userName);
-  if (!external) {
-    name = "Your";
-  } else {
-    name = `${name}'s`;
-  }
-  console.log("external", external, "name", name);
+  const userName = useSelector((state) => state.userName);
+  const athleteName = userName || "Demo athlete";
+  const possessiveName = external ? `${athleteName}'s` : "Your";
   const pinnedActivities = useSelector((state) => state.pinnedActivities);
   const rankedActivities = useSelector((state) => state.distanceRides);
   const strava_id = useSelector((state) => state.userId);
@@ -285,27 +279,42 @@ const Dashboard = (props) => {
     setPinnedActivityOpen(false);
   };
 
+  const totalDistance = (userActivities ?? []).reduce(
+    (total, activity) => total + activity.distance,
+    0,
+  );
+  const totalElevation = (userActivities ?? []).reduce(
+    (total, activity) => total + activity.total_elevation_gain,
+    0,
+  );
   return (
-    <div style={{ paddingTop: "5em", overflowX: "hidden" }}>
+    <main className="dashboard-page">
+      <header className="dashboard-hero">
+        <div>
+          <span className="section-kicker">Adventure archive</span>
+          <h1>{possessiveName} life outside.</h1>
+          <p>A living record of long roads, high places and days worth remembering.</p>
+        </div>
+        <div className="dashboard-stats">
+          <div><strong>{(userActivities ?? []).length}</strong><span>activities</span></div>
+          <div><strong>{Math.round(totalDistance / 1000).toLocaleString()}</strong><span>kilometres</span></div>
+          <div><strong>{Math.round(totalElevation).toLocaleString()}</strong><span>metres climbed</span></div>
+          <div><strong>{trips.length}</strong><span>big journeys</span></div>
+        </div>
+      </header>
       {trips?.length > 0 && (
-        <>
-          <h1 style={{ textAlign: "center" }}>{name} Big Trips</h1>
-          {trips.map((trip, index) => (
-            <div
+        <section className="dashboard-section trips-section">
+          <div className="section-heading">
+            <span className="section-index">01</span>
+            <div><span className="section-kicker">Multi-day stories</span><h2>Journeys that went further.</h2></div>
+          </div>
+          <div className="trip-list">
+            {trips.map((trip, index) => (
+            <article
+              className="trip-card"
               key={index}
               onClick={() => handleTripClick(index)}
-              style={{
-                backgroundColor: "white",
-                transition: "background-color 0.1s ease",
-              }}
-              onMouseOver={(e) =>
-                (e.currentTarget.style.backgroundColor = "whitesmoke")
-              }
-              onMouseOut={(e) =>
-                (e.currentTarget.style.backgroundColor = "white")
-              }
             >
-              {index === 0 && <hr style={{ margin: "0" }} />}
               <Trip
                 key={index + zoomeds[index]}
                 trip={trip}
@@ -313,16 +322,17 @@ const Dashboard = (props) => {
                 zoomed={zoomeds[index]}
                 onButtonClick={handleTripToggleButtonClick}
               />
-              <hr style={{ margin: "0" }} />
-            </div>
-          ))}
-        </>
+            </article>
+            ))}
+          </div>
+        </section>
       )}
-      <WorldMap activities={userActivities} name={name} />
-      <div style={{ paddingTop: "2em", position: "relative" }}>
-        <h1 style={{ textAlign: "center" }}>
-          {name} pinned activities <FontAwesomeIcon icon={faThumbTack} />
-        </h1>
+      <WorldMap activities={userActivities} name={possessiveName} />
+      <section className="dashboard-section pinned-section">
+        <div className="section-heading">
+          <span className="section-index">03</span>
+          <div><span className="section-kicker">The keepers</span><h2>Pinned adventures. <FontAwesomeIcon icon={faThumbTack} /></h2></div>
+        </div>
         {!external && pinnedActivities?.length > 0 && (
           <button
             onClick={openDialog}
@@ -366,30 +376,13 @@ const Dashboard = (props) => {
         <div
           className="pinnedContainer"
           ref={scrollContainerRef}
-          style={{
-            display: "flex",
-            overflowX: "auto",
-            backgroundColor: "whitesmoke",
-          }}
         >
           {pinnedActivities?.length > 0 ? (
             pinnedActivities.map((activity, index) => (
               <div
                 key={index}
+                className="pinned-card"
                 ref={(el) => (activityRefs.current[index] = el)}
-                style={{
-                  flex: "0 0 auto",
-                  padding: "1em",
-                  marginRight: "1em",
-                  backgroundColor: "whitesmoke",
-                  transition: "background-color 0.1s ease",
-                }}
-                onMouseOver={(e) =>
-                  (e.currentTarget.style.backgroundColor = "lightgrey")
-                }
-                onMouseOut={(e) =>
-                  (e.currentTarget.style.backgroundColor = "whitesmoke")
-                }
                 onClick={() => handleClickOpen(activity)}
               >
                 <ActivityForRanking activity={activity} />
@@ -397,7 +390,7 @@ const Dashboard = (props) => {
             ))
           ) : (
             <div style={{ width: "100%", textAlign: "center" }}>
-              {name} pinned activities will appear here
+              {possessiveName} pinned activities will appear here
             </div>
           )}
 
@@ -446,29 +439,22 @@ const Dashboard = (props) => {
             </div>
           ))}
         </Modal>
-      </div>
-      <h1 style={{ paddingTop: "2em", textAlign: "center" }}>
-        {name} biggest activities
-      </h1>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          backgroundColor: "whitesmoke",
-        }}
-      >
+      </section>
+      <section className="dashboard-section rankings-section">
+        <div className="section-heading">
+          <span className="section-index">04</span>
+          <div><span className="section-kicker">Personal bests</span><h2>The biggest days.</h2></div>
+        </div>
+      <div className="rankings-grid">
         {rankedActivities?.map((actObj, index) => (
           <div
-            style={{
-              flex: "1",
-              borderRight:
-                index < rankedActivities.length - 1 ? "1px solid #000" : "none",
-              paddingRight: "1em",
-            }}
+            className="ranking-card"
+            key={`${actObj.type}-${actObj.crit}`}
           >
             <ActivityRanking
               crit={actObj.crit}
               activities={actObj.activities}
+              ownerName={possessiveName}
               activityRefs={activityRefs}
               isOverflowing={isOverflowing}
               scrollLeft={scrollLeft}
@@ -477,6 +463,7 @@ const Dashboard = (props) => {
           </div>
         ))}
       </div>
+      </section>
 
       {!external && (
         <button
@@ -500,7 +487,7 @@ const Dashboard = (props) => {
         theme="light"
       />
       {!external && FloatingActionButton(handleShareClick)}
-    </div>
+    </main>
   );
 };
 
@@ -527,29 +514,23 @@ function FloatingActionButton(funClick) {
   );
 }
 
-function ActivityRanking({ crit, activities }) {
+function ActivityRanking({ crit, activities, ownerName }) {
+  const activityType = activities?.[0]?.type ?? "Ride";
   return (
-    <div
-      className="rankedContainer"
-      style={{
-        padding: "10px",
-        display: "flex",
-        flexDirection: "column",
-        overflowX: "hidden",
-      }}
-    >
-      <FontAwesomeIcon
-        icon={activities[0].type === "Run" ? faRunning : faBicycle}
-        style={{ paddingBottom: "0.5em", textAlign: "center" }}
-      />
+    <div className="rankedContainer">
+      <div className="ranking-title">
+        <span className="ranking-icon"><FontAwesomeIcon icon={activityType === "Run" ? faRunning : faBicycle} /></span>
+        <div><strong>{activityType === "Run" ? "On foot" : "On two wheels"}</strong><span>{crit === "distance" ? "Longest distance" : "Most elevation"}</span></div>
+      </div>
       {activities?.length > 0 ? (
         activities.map((activity, index) => (
-          <div key={index} style={{ marginTop: "1em" }}>
+          <div key={index} className="ranking-row">
+            <span className="ranking-position">{String(index + 1).padStart(2, "0")}</span>
             <h6>
               {crit ? (
                 <>
-                  {shortenText(activity.name, 22)}:{" "}
-                  <span style={{ fontSize: "0.8em" }}>
+                  {shortenText(activity.name, 28)}
+                  <span className="ranking-value">
                     {crit === "distance"
                       ? `${formatNumber(convertToKm(activity[crit]))}km`
                       : `${formatNumber(activity[crit])}m`}
@@ -569,7 +550,7 @@ function ActivityRanking({ crit, activities }) {
         ))
       ) : (
         <div style={{ width: "100%", textAlign: "center" }}>
-          {name} ranked activities will appear here
+          {ownerName} ranked activities will appear here
         </div>
       )}
     </div>
