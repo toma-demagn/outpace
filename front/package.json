@@ -1,5 +1,6 @@
 {
   "name": "outpace-front",
+  "homepage": "https://toma-demagn.github.io/outpace",
   "version": "0.1.0",
   "private": true,
   "dependencies": {

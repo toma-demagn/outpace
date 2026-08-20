@@ -5,7 +5,7 @@ import Navbar from "../components/Navbar";
 import About from "../pages/About";
 import NotFound from "../pages/NotFound";
 import DBRedirect from "../pages/DBRedirect";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { HashRouter, Route, Routes } from "react-router-dom";
 import Dashboard from "../pages/Dashboard";
 import Summary from "../pages/Summary";
 import TripView from "../pages/TripView";
@@ -14,7 +14,7 @@ import DashboardRedirect from "../pages/DashboardRedirect";
 class AppRouter extends React.Component {
   render() {
     return (
-      <BrowserRouter>
+      <HashRouter>
         <Navbar />
         <div className="main">
           <Routes>
@@ -32,7 +32,7 @@ class AppRouter extends React.Component {
             <Route path="/about" element={<About />} />
           </Routes>
         </div>
-      </BrowserRouter>
+      </HashRouter>
     );
   }
 }
